@@ -224,6 +224,61 @@
       </footer>
     </div>
 
+    <!-- Custom Alert Modal -->
+    <div id="customAlert" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black bg-opacity-50">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 transform transition-all duration-300 scale-95">
+            <!-- Alert Header -->
+            <div class="flex items-center justify-between p-6 border-b border-gray-200">
+                <div class="flex items-center gap-3">
+                    <div id="alertIcon" class="w-10 h-10 rounded-full flex items-center justify-center">
+                        <i id="alertIconClass" class="text-2xl"></i>
+                    </div>
+                    <h3 id="alertTitle" class="text-lg font-semibold text-gray-800"></h3>
+                </div>
+                <button onclick="closeAlert()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <!-- Alert Content -->
+            <div class="p-6">
+                <p id="alertMessage" class="text-gray-600 mb-4 leading-relaxed"></p>
+                <div id="alertSuggestion" class="hidden bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+                    <div class="flex items-start gap-3">
+                        <i class="fas fa-lightbulb text-blue-600 mt-1"></i>
+                        <div>
+                            <p class="font-medium text-blue-800 mb-1">💡 Saran:</p>
+                            <p id="alertSuggestionText" class="text-blue-700 text-sm"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Alert Footer -->
+            <div class="flex justify-end gap-3 p-6 border-t border-gray-200">
+                <button onclick="closeAlert()" class="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors">
+                    <i class="fas fa-times mr-2"></i>
+                    Tutup
+                </button>
+                <button id="alertActionBtn" onclick="closeAlert()" class="hidden px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                    <i class="fas fa-check mr-2"></i>
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Toast -->
+    <div id="successToast" class="fixed top-4 right-4 z-50 hidden transform translate-x-full transition-transform duration-300">
+        <div class="bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg flex items-center gap-3">
+            <i class="fas fa-check-circle text-xl"></i>
+            <div>
+                <p class="font-medium">Berhasil!</p>
+                <p id="successMessage" class="text-sm opacity-90"></p>
+            </div>
+        </div>
+    </div>
+
     <!-- JavaScript -->
     <script src="{{ url_for('static', filename='app.js') }}"></script>
   </body>

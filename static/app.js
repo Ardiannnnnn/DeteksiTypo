@@ -57,20 +57,39 @@ function handleFileSelect(e) {
 }
 
 function handleFile(file) {
-    const allowedTypes = ['text/plain', 'application/pdf', 'application/msword', 
-                         'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-    
-    if (!allowedTypes.includes(file.type) && !file.name.toLowerCase().endsWith('.txt')) {
-        alert('Format file tidak didukung. Gunakan TXT, DOC, DOCX, atau PDF.');
-        return;
-    }
-
     selectedFile = file;
     
+    // Validasi file
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+        showAlert(
+            'File Terlalu Besar', 
+            `Ukuran file ${formatFileSize(file.size)} melebihi batas maksimal 10MB.`, 
+            'warning'
+        );
+        return;
+    }
+    
+    // Validasi format
+    const allowedFormats = ['.txt', '.docx', '.pdf'];
+    const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+    
+    if (!allowedFormats.includes(fileExtension)) {
+        showAlert(
+            'Format File Tidak Didukung', 
+            `Format ${fileExtension.toUpperCase()} tidak didukung.`, 
+            'warning',
+            'Gunakan file dengan format TXT, DOCX, atau PDF'
+        );
+        return;
+    }
+    
+    // Show file info
     document.getElementById('fileName').textContent = file.name;
     document.getElementById('fileSize').textContent = formatFileSize(file.size);
     document.getElementById('fileInfo').classList.remove('hidden');
-    document.getElementById('fileUploadArea').classList.add('hidden');
+    
+    showSuccessToast(`File ${file.name} berhasil dipilih`);
 }
 
 function removeFile() {
@@ -111,7 +130,7 @@ async function checkTypo() {
     
     if (currentInputMethod === 'file') {
         if (!selectedFile) {
-            alert('Silakan pilih file terlebih dahulu!');
+            showAlert('File Tidak Dipilih', 'Silakan pilih file terlebih dahulu!', 'warning');
             return;
         }
         
@@ -134,19 +153,25 @@ async function checkTypo() {
             
             if (response.ok) {
                 displayResults(data);
+                showSuccessToast(`File ${data.file_type} berhasil diproses!`);
             } else {
-                // Handle error dengan suggestion
-                let errorMessage = data.error;
-                if (data.suggestion) {
-                    errorMessage += '\n\n💡 ' + data.suggestion;
-                }
-                alert('Error: ' + errorMessage);
+                // Handle error dengan custom alert
+                showAlert(
+                    'Error Memproses File', 
+                    data.error, 
+                    'error', 
+                    data.suggestion || null
+                );
             }
             return;
             
         } catch (error) {
             document.getElementById('loading').classList.add('hidden');
-            alert('Terjadi kesalahan saat memproses file');
+            showAlert(
+                'Kesalahan Koneksi', 
+                'Terjadi kesalahan saat memproses file. Silakan coba lagi.', 
+                'error'
+            );
             console.error('Error:', error);
             return;
         }
@@ -155,7 +180,7 @@ async function checkTypo() {
         textToCheck = textInput.value.trim();
         
         if (!textToCheck) {
-            alert('Silakan masukkan teks terlebih dahulu!');
+            showAlert('Teks Kosong', 'Silakan masukkan teks terlebih dahulu!', 'warning');
             return;
         }
     }
@@ -178,12 +203,21 @@ async function checkTypo() {
         
         if (response.ok) {
             displayResults(data);
+            if (data.total_typos > 0) {
+                showSuccessToast(`Ditemukan ${data.total_typos} potensi typo`);
+            } else {
+                showSuccessToast('Tidak ada typo yang terdeteksi!');
+            }
         } else {
-            alert('Error: ' + data.error);
+            showAlert('Error Pemeriksaan', data.error, 'error');
         }
     } catch (error) {
         document.getElementById('loading').classList.add('hidden');
-        alert('Terjadi kesalahan saat memeriksa typo');
+        showAlert(
+            'Kesalahan Koneksi', 
+            'Terjadi kesalahan saat memeriksa typo. Silakan coba lagi.', 
+            'error'
+        );
         console.error('Error:', error);
     }
 }
@@ -255,10 +289,115 @@ function replaceSuggestion(oldWord, newWord) {
 }
 
 function clearAll() {
-    if (currentInputMethod === 'file') {
-        removeFile();
-    } else {
-        document.getElementById('textInput').value = '';
-    }
+    // Clear file
+    selectedFile = null;
+    document.getElementById('fileInput').value = '';
+    document.getElementById('fileInfo').classList.add('hidden');
+    
+    // Clear text
+    document.getElementById('textInput').value = '';
+    
+    // Hide results
     document.getElementById('resultsSection').classList.add('hidden');
+    
+    showSuccessToast('Semua data berhasil dihapus');
 }
+
+// Custom Alert Functions
+function showAlert(title, message, type = 'info', suggestion = null) {
+    const alertModal = document.getElementById('customAlert');
+    const alertIcon = document.getElementById('alertIcon');
+    const alertIconClass = document.getElementById('alertIconClass');
+    const alertTitle = document.getElementById('alertTitle');
+    const alertMessage = document.getElementById('alertMessage');
+    const alertSuggestion = document.getElementById('alertSuggestion');
+    const alertSuggestionText = document.getElementById('alertSuggestionText');
+    
+    // Set content
+    alertTitle.textContent = title;
+    alertMessage.textContent = message;
+    
+    // Set icon and colors based on type
+    switch(type) {
+        case 'error':
+            alertIcon.className = 'w-10 h-10 rounded-full flex items-center justify-center bg-red-100';
+            alertIconClass.className = 'fas fa-exclamation-triangle text-2xl text-red-600';
+            break;
+        case 'success':
+            alertIcon.className = 'w-10 h-10 rounded-full flex items-center justify-center bg-green-100';
+            alertIconClass.className = 'fas fa-check-circle text-2xl text-green-600';
+            break;
+        case 'warning':
+            alertIcon.className = 'w-10 h-10 rounded-full flex items-center justify-center bg-yellow-100';
+            alertIconClass.className = 'fas fa-exclamation-circle text-2xl text-yellow-600';
+            break;
+        default: // info
+            alertIcon.className = 'w-10 h-10 rounded-full flex items-center justify-center bg-blue-100';
+            alertIconClass.className = 'fas fa-info-circle text-2xl text-blue-600';
+    }
+    
+    // Show/hide suggestion
+    if (suggestion) {
+        alertSuggestionText.textContent = suggestion;
+        alertSuggestion.classList.remove('hidden');
+    } else {
+        alertSuggestion.classList.add('hidden');
+    }
+    
+    // Show modal with animation
+    alertModal.classList.remove('hidden');
+    setTimeout(() => {
+        alertModal.querySelector('.transform').classList.remove('scale-95');
+        alertModal.querySelector('.transform').classList.add('scale-100');
+    }, 10);
+}
+
+function closeAlert() {
+    const alertModal = document.getElementById('customAlert');
+    const modalContent = alertModal.querySelector('.transform');
+    
+    // Hide with animation
+    modalContent.classList.remove('scale-100');
+    modalContent.classList.add('scale-95');
+    
+    setTimeout(() => {
+        alertModal.classList.add('hidden');
+    }, 300);
+}
+
+function showSuccessToast(message) {
+    const toast = document.getElementById('successToast');
+    const successMessage = document.getElementById('successMessage');
+    
+    successMessage.textContent = message;
+    
+    // Show toast
+    toast.classList.remove('hidden');
+    setTimeout(() => {
+        toast.classList.remove('translate-x-full');
+        toast.classList.add('translate-x-0');
+    }, 10);
+    
+    // Auto hide after 3 seconds
+    setTimeout(() => {
+        toast.classList.remove('translate-x-0');
+        toast.classList.add('translate-x-full');
+        setTimeout(() => {
+            toast.classList.add('hidden');
+        }, 300);
+    }, 3000);
+}
+
+// Close modal when clicking outside
+document.getElementById('customAlert').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeAlert();
+    }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeAlert();
+    }
+});
