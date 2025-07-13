@@ -1,0 +1,91 @@
+@import "tailwindcss";
+
+/* Custom keyframes for animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+/* Custom utility classes */
+@utility gradient-bg {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+@utility glass-effect {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+@utility card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 1rem;
+  padding: 2rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+@utility uploadarea {
+  border: 2px dashed #d1d5db;
+  border-radius: 0.75rem;
+  padding: 2.5rem;
+  text-align: center;
+  cursor: pointer;
+  background: rgba(249, 250, 251, 0.5);
+  transition: all 0.3s ease;
+}
+
+@utility btnprimary {
+  background: linear-gradient(to right, #2563eb, #9333ea);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  box-shadow: 0 4px 14px 0 rgba(0, 118, 255, 0.39);
+  border: none;
+  cursor: pointer;
+}
+
+@utility btnsecondary {
+  background: #6b7280;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border: none;
+  cursor: pointer;
+}
+
+@utility animatefloat {
+  animation: float 6s ease-in-out infinite;
+}
+
+@utility animatepulseslow {
+  animation: pulse 3s ease-in-out infinite;
+}
+
+/* Traditional CSS for hover effects */
+.uploadarea:hover,
+.uploadarea.drag-over {
+  border-color: #3b82f6;
+  background: rgba(239, 246, 255, 0.5);
+}
+
+.btnprimary:hover {
+  box-shadow: 0 6px 20px rgba(93, 93, 255, 0.23);
+  transform: translateY(-2px);
+}
+
+.btnsecondary:hover {
+  background: #4b5563;
+  transform: translateY(-2px);
+}
